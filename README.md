@@ -294,6 +294,26 @@ Bộ đôi miễn phí: **Render** (chạy app) + **Supabase** (Postgres). App c
 
 Từ đó mỗi lần push lên nhánh chính, Render tự deploy lại. Migration mới tự chạy khi container khởi động; seed **không** chạy lại.
 
+**Tạo Web Service thủ công thay vì Blueprint?** Điền như sau. Root Directory **để trống**, vì `Dockerfile` cần cả monorepo:
+
+| Ô | Giá trị |
+| --- | --- |
+| Language / Runtime | Docker |
+| Root Directory | *(để trống)* |
+| Dockerfile Path | `./Dockerfile` |
+| Docker Build Context Directory | `.` |
+| Health Check Path | `/api/health` |
+| Environment | `DATABASE_URL`, `JWT_SECRET` (≥ 32 ký tự), `COOKIE_SECURE=true`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` |
+
+### FE trên Vercel + BE trên Render (tuỳ chọn)
+
+Service Render ở trên **đã phục vụ cả giao diện**, nên không bắt buộc dùng Vercel. Nếu muốn giao diện chạy từ CDN của Vercel:
+
+1. Vercel → **Add New Project** → chọn repo → **Root Directory: `apps/web`**. Framework Vite, build command và output directory được lấy từ `apps/web/vercel.json`. Không cần biến môi trường nào.
+2. Mở `apps/web/vercel.json`, đặt `destination` của rule `/api/:path*` thành **URL thật của service Render** (mặc định đang là `https://love-vouchers.onrender.com`; Render thêm hậu tố nếu tên bị trùng), rồi push.
+
+Vercel chuyển tiếp `/api/*` sang Render nên trình duyệt vẫn chỉ thấy một domain, cookie đăng nhập hoạt động bình thường. Rule còn lại trả `index.html` cho mọi đường dẫn như `/em` hay `/admin`. Lưu ý: khi Render free đang ngủ, request API đầu tiên vẫn phải chờ nó thức dậy (~1 phút); dịch vụ ping ở trên giúp tránh việc này.
+
 > Trang của em **không có mật khẩu**: ai có link đều xem được và gửi được điều ước (đã có giới hạn số lần gửi). Hãy chỉ gửi link cho em thôi nhé.
 
 ## Xử lý sự cố
@@ -309,4 +329,6 @@ Từ đó mỗi lần push lên nhánh chính, Render tự deploy lại. Migrati
 | Render: lỗi SSL / certificate khi kết nối DB | Thiếu `?uselibpqcompat=true&sslmode=require` ở cuối `DATABASE_URL`. |
 | Render: không kết nối được DB (timeout / `ENETUNREACH`) | Đang dùng "Direct connection" của Supabase (chỉ IPv6); đổi sang **Session pooler**. |
 | Đăng nhập xong vẫn bị đá ra | Đang chạy http nhưng `COOKIE_SECURE=true`. Ở local để `false`. |
+| Vercel build báo `Cannot find module '@love/shared'` | Root Directory phải là `apps/web` và dùng script `build` có sẵn (nó build `packages/shared` trước). Đừng đổi build command thành `vite build`. |
+| Vercel: trang mở được nhưng không có voucher / không đăng nhập được | `destination` của `/api/:path*` trong `apps/web/vercel.json` chưa phải URL Render thật, hoặc service Render đang lỗi / đang ngủ. |
 | Muốn làm lại dữ liệu từ đầu | `pnpm db:reset` (xoá sạch!) |
