@@ -1,0 +1,84 @@
+.back {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--color-heading);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: start;
+  gap: var(--space-8);
+}
+
+.preview {
+  position: sticky;
+  top: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.fieldLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-soft);
+}
+
+.colorField,
+.quantityField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+
+
+
+
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.swatch {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+}
+
+.swatchRing {
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--color-heading);
+  border-radius: 50%;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* On narrow screens the preview goes first so edits are visible while scrolling the form. */
+  .preview {
+    position: static;
+    order: -1;
+  }
+}

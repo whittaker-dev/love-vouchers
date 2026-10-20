@@ -1,0 +1,24 @@
+# Local development database only (`pnpm infra:up`). The app itself runs with `pnpm dev`;
+# the production image is the root Dockerfile (deployed on Render).
+name: love-vouchers
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: love
+      POSTGRES_PASSWORD: love
+      POSTGRES_DB: love_vouchers
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U love -d love_vouchers"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:

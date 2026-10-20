@@ -1,0 +1,91 @@
+// Connection URL lives in prisma7.config.ts (Prisma 7 no longer reads it from here).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+  // .js specifiers so `tsc` emits imports Node can resolve at runtime.
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// The boyfriend. Only admins log in; the girlfriend's page is public.
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+/// Single-row table (id is always 1): the girlfriend shown on the public page.
+model Profile {
+  id          Int       @id @default(1)
+  name        String
+  nickname    String?
+  avatarEmoji String    @default("🐐")
+  bio         String?
+  birthday    DateTime? @db.Date
+  anniversary DateTime? @db.Date
+  favorites   String[]
+  updatedAt   DateTime  @updatedAt
+}
+
+model Voucher {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  emoji       String
+  value       String?
+  terms       String?
+  color       String
+  /// null = unlimited uses.
+  quantity    Int?
+  /// Times picked. Stored rather than counted because handled notifications are deleted.
+  usedCount   Int          @default(0)
+  expiresAt   DateTime?    @db.Date
+  isActive    Boolean      @default(true)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  redemptions Redemption[]
+
+  @@index([isActive, sortOrder])
+}
+
+/// A wish the girlfriend sent (note + vouchers) = one admin notification.
+/// Deleted together with its last item once the admin has handled everything.
+model WishRequest {
+  id        String       @id @default(cuid())
+  message   String?
+  createdAt DateTime     @default(now())
+  items     Redemption[]
+
+  @@index([createdAt])
+}
+
+/// A voucher inside a wish that is still waiting for the admin. Exists only while pending:
+/// "done" and "cancel" both delete it (cancel also gives the use back via Voucher.usedCount).
+model Redemption {
+  id           String      @id @default(cuid())
+  requestId    String
+  request      WishRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// Nullable so deleting a voucher does not drop a pending notification.
+  voucherId    String?
+  voucher      Voucher?    @relation(fields: [voucherId], references: [id], onDelete: SetNull)
+  voucherTitle String
+  voucherEmoji String
+
+  @@index([voucherId])
+  @@index([requestId])
+}
+
+/// One-time setup steps already performed (e.g. "starter-vouchers"). The API runs these on boot;
+/// the marker row is what stops them repeating on every restart or redeploy.
+model SetupStep {
+  key    String   @id
+  doneAt DateTime @default(now())
+}

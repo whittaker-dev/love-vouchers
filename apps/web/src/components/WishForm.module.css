@@ -1,0 +1,140 @@
+.card {
+  scroll-margin-top: 100px;
+  padding: 44px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 1.5rem;
+}
+
+.title {
+  margin-top: var(--space-1);
+  font-size: var(--text-3xl);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+}
+
+.chipBox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 66px;
+  padding: var(--space-4);
+  border: 1px dashed var(--color-line-strong);
+  border-radius: var(--radius-md);
+  background: #fff7fa;
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.chipBox[data-warn] {
+  border-color: var(--color-accent);
+}
+
+.empty {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.chipBox[data-warn] .empty {
+  color: var(--color-accent);
+  font-weight: var(--weight-bold);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--color-heading);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+
+.chipRemove {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 9px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.label span {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+}
+
+.fieldFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-2xs);
+}
+
+.counter {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+
+.footnote {
+  margin-top: calc(-1 * var(--space-1));
+  color: var(--color-text);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .head {
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,21 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heart {
+  position: absolute;
+  display: inline-block;
+  color: var(--color-accent);
+  line-height: 1;
+  opacity: 0.35;
+}
+
+/* On phones there is no margin around the grid; the hearts would sit on top of card text. */
+@media (max-width: 640px) {
+  .layer {
+    display: none;
+  }
+}

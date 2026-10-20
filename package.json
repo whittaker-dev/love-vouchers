@@ -1,0 +1,23 @@
+{
+  "name": "love-vouchers",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @love/shared build && pnpm --parallel --filter @love/shared --filter @love/api --filter @love/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm --filter @love/shared build && pnpm -r typecheck",
+    "infra:up": "docker compose up -d db",
+    "infra:down": "docker compose down",
+    "db:migrate": "pnpm --filter @love/api db:migrate",
+    "db:seed": "pnpm --filter @love/api db:seed",
+    "db:reset": "pnpm --filter @love/api db:reset",
+    "db:studio": "pnpm --filter @love/api db:studio"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

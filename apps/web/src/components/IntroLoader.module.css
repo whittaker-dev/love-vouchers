@@ -1,0 +1,67 @@
+/* No background of its own: the tiles are the curtain, so the page shows through as they go. */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tiles {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-auto-rows: 1fr;
+  pointer-events: auto;
+}
+
+/* Slightly oversized so neighbouring tiles overlap: no hairline seams while the grid is whole. */
+.tile {
+  display: block;
+  margin: -0.5px;
+  background: var(--color-bg);
+}
+
+/* Every other tile a touch pinker, so the grid reads as squares the moment they start to shrink. */
+.tile:nth-child(odd) {
+  background: #ffeef4;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 260px;
+  height: 220px;
+}
+
+.heart {
+  width: 96px;
+  height: 96px;
+  overflow: visible;
+  filter: drop-shadow(0 6px 0 var(--color-accent-shadow));
+}
+
+.wordmark {
+  display: flex;
+  color: var(--color-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-black);
+  letter-spacing: -0.02em;
+}
+
+.wordmark span {
+  display: inline-block;
+}
+
+.sparkle {
+  position: absolute;
+  color: var(--color-accent);
+  font-size: 14px;
+}

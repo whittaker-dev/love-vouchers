@@ -1,0 +1,14 @@
+.mask {
+  display: inline-block;
+  overflow: hidden;
+  /* Room for diacritics above and descenders below, cancelled out so line height is unchanged. */
+  padding: 0.14em 0 0.1em;
+  margin: -0.14em 0 -0.1em;
+  vertical-align: top;
+}
+
+.word {
+  display: inline-block;
+  transform-origin: left bottom;
+  will-change: transform;
+}

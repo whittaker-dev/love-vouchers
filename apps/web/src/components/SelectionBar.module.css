@@ -1,0 +1,37 @@
+.bar {
+  position: fixed;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 22px 10px 10px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  box-shadow: var(--shadow-button), var(--shadow-pop);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+}
+
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--color-accent);
+  font-weight: var(--weight-black);
+}
+
+/* Sit above the bottom tab bar on phones. */
+@media (max-width: 640px) {
+  .bar {
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+}

@@ -1,0 +1,50 @@
+.form {
+  max-width: 760px;
+}
+
+.favorites {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.favoriteInputRow {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--card-blush);
+  font-size: var(--text-sm);
+}
+
+.chip button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 0.65rem;
+}
+
+.chip button:hover {
+  background: var(--color-accent-soft);
+}

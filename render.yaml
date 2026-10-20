@@ -1,0 +1,29 @@
+# Render Blueprint: one free Docker web service serving both the API and the web app.
+# Database: Supabase (session pooler URL). No email: wishes show up on the admin's "Thông báo" page.
+# On first boot the API creates the admin (from ADMIN_*), her profile and the starter vouchers,
+# exactly once per database. Step-by-step guide: README.md → "Deploy lên Render".
+services:
+  - type: web
+    name: love-vouchers
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      # Supabase → Connect → Session pooler (port 5432), with ?uselibpqcompat=true&sslmode=require appended.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      # Only used to create the admin on the very first boot; change the password later in /admin.
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        sync: false
