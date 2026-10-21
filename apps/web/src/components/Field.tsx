@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useId } from "react";
+import { useId, useState } from "react";
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
-import { duration, easeOut } from "../lib/motion";
+import { duration, easeOut, spring } from "../lib/motion";
 import styles from "./Field.module.css";
 
 interface FieldProps {
@@ -43,6 +43,40 @@ export function Field({ label, hint, error, children }: FieldProps) {
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={[styles.control, className].filter(Boolean).join(" ")} {...props} />;
+}
+
+type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
+
+/** A password input with a show/hide toggle inside its right edge. */
+export function PasswordInput({ className, ...props }: PasswordInputProps) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className={styles.password}>
+      <Input type={visible ? "text" : "password"} className={[styles.passwordControl, className].filter(Boolean).join(" ")} {...props} />
+      <motion.button
+        type="button"
+        className={styles.reveal}
+        onClick={() => setVisible((current) => !current)}
+        aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+        aria-pressed={visible}
+        whileHover={{ scale: 1.12 }}
+        whileTap={{ scale: 0.85 }}
+      >
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span
+            key={visible ? "shown" : "hidden"}
+            aria-hidden
+            initial={{ scale: 0.4, rotate: -30, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            exit={{ scale: 0.4, rotate: 30, opacity: 0 }}
+            transition={spring.bouncy}
+          >
+            {visible ? "🙈" : "👀"}
+          </motion.span>
+        </AnimatePresence>
+      </motion.button>
+    </div>
+  );
 }
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {

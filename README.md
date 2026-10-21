@@ -265,6 +265,7 @@ Mọi route đều có tiền tố `/api`, trả JSON. Lỗi có dạng `{ "erro
 | GET | `/auth/me` | admin | admin hiện tại |
 | PUT | `/auth/password` | admin | đổi mật khẩu admin |
 | POST | `/auth/user/login` · `/auth/user/logout` | — | đăng nhập / đăng xuất **em** |
+| GET | `/auth/user/welcome` | ai cũng được | `{ name }`: tên em cho lời chào ở trang đăng nhập (chỉ trả tên) |
 | GET | `/auth/viewer` | em hoặc admin | ai đang xem trang em (`role: "user" \| "admin"`) |
 | GET | `/profile` | em hoặc admin | hồ sơ em + tên anh |
 | GET | `/vouchers` | em hoặc admin | voucher đang bật và chưa hết hạn |

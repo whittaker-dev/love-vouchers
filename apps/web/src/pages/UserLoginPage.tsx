@@ -3,9 +3,9 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { loginSchema } from "@love/shared";
-import { useUserLogin, useViewer } from "../api/hooks";
+import { useUserLogin, useViewer, useWelcome } from "../api/hooks";
 import { Button } from "../components/Button";
-import { Field, FormError, Input } from "../components/Field";
+import { Field, FormError, Input, PasswordInput } from "../components/Field";
 import { apiFieldErrors, apiFormError, validate } from "../lib/forms";
 import type { FieldErrors } from "../lib/forms";
 import { spring } from "../lib/motion";
@@ -16,6 +16,7 @@ const FLOATING = ["💗", "💌", "✨", "🌸", "💕", "🎀"];
 /** Her login. The account is created by the admin (/admin/account). */
 export function UserLoginPage() {
   const viewer = useViewer();
+  const welcome = useWelcome();
   const login = useUserLogin();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -73,7 +74,20 @@ export function UserLoginPage() {
         >
           💝
         </motion.span>
-        <h1 className={styles.title}>Chào em 💕</h1>
+        {/*
+          The greeting mounts only once her name has arrived, so it never flashes a placeholder first.
+          A mount animation, not an `animate` prop flipping after load: the latter was seen to stay
+          stuck at opacity 0 on a cold load. The nbsp keeps the line's height meanwhile.
+        */}
+        <h1 className={styles.title}>
+          {welcome.isPending ? (
+            "\u00a0"
+          ) : (
+            <motion.span className={styles.titleText} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={spring.soft}>
+              {welcome.data?.name ? `Chào ${welcome.data.name} 💕` : "Xin chào 💕"}
+            </motion.span>
+          )}
+        </h1>
         <p className={styles.subtitle}>Đăng nhập bằng tài khoản anh đưa cho em nha</p>
 
         <form className={styles.form} onSubmit={submit} noValidate>
@@ -91,9 +105,8 @@ export function UserLoginPage() {
           </Field>
           <Field label="Mật khẩu" error={errors.password}>
             {(id) => (
-              <Input
+              <PasswordInput
                 id={id}
-                type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}

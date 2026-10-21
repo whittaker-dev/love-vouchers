@@ -5,7 +5,7 @@ import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { loginSchema } from "@love/shared";
 import { useLogin, useMe } from "../../api/hooks";
 import { Button } from "../../components/Button";
-import { Field, FormError, Input } from "../../components/Field";
+import { Field, FormError, Input, PasswordInput } from "../../components/Field";
 import { apiFieldErrors, apiFormError, validate } from "../../lib/forms";
 import type { FieldErrors } from "../../lib/forms";
 import { spring } from "../../lib/motion";
@@ -77,9 +77,8 @@ export function LoginPage() {
           </Field>
           <Field label="Mật khẩu" error={errors.password}>
             {(id) => (
-              <Input
+              <PasswordInput
                 id={id}
-                type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}

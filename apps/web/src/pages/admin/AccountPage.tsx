@@ -13,7 +13,7 @@ import {
   useSettings,
 } from "../../api/hooks";
 import { Button } from "../../components/Button";
-import { Field, FormError, Input } from "../../components/Field";
+import { Field, FormError, Input, PasswordInput } from "../../components/Field";
 import { ErrorState, Skeleton } from "../../components/StateViews";
 import { formatDateTime } from "../../lib/format";
 import { apiFieldErrors, apiFormError, validate } from "../../lib/forms";
@@ -292,12 +292,12 @@ function PasswordPanel() {
       <h2 className={styles.title}>Đổi mật khẩu của anh</h2>
       <Field label="Mật khẩu hiện tại" error={errors.currentPassword}>
         {(id) => (
-          <Input id={id} type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} aria-invalid={Boolean(errors.currentPassword)} />
+          <PasswordInput id={id} autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} aria-invalid={Boolean(errors.currentPassword)} />
         )}
       </Field>
       <Field label="Mật khẩu mới" hint="Ít nhất 8 ký tự" error={errors.newPassword}>
         {(id) => (
-          <Input id={id} type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} aria-invalid={Boolean(errors.newPassword)} />
+          <PasswordInput id={id} autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} aria-invalid={Boolean(errors.newPassword)} />
         )}
       </Field>
       <FormError message={apiFormError(changePassword.error)} />

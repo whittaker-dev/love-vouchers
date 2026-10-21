@@ -71,6 +71,12 @@ export interface ViewerDto {
   email: string;
 }
 
+/** What her login page may show before anyone is logged in. */
+export interface WelcomeDto {
+  /** Her name from the admin's profile page; null only if no profile exists yet. */
+  name: string | null;
+}
+
 /** Her monthly sending allowance (calendar month, Vietnam time). */
 export interface WishQuotaDto {
   /** "2026-10" */

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { changePasswordSchema, loginSchema } from "@love/shared";
-import type { AdminDto, ViewerDto } from "@love/shared";
+import type { AdminDto, ViewerDto, WelcomeDto } from "@love/shared";
 import {
   endSession,
   hashPassword,
@@ -63,6 +63,12 @@ authRouter.post("/user/login", loginLimiter, async (req, res) => {
   if (!user || !(await verifyPassword(password, user.passwordHash))) throw new HttpError(401, WRONG_CREDENTIALS);
   startSession(res, "user", user.id);
   res.json({ role: "user", email: user.email } satisfies ViewerDto);
+});
+
+// Public on purpose: her login page greets her by name before she has a session. Only the name leaves.
+authRouter.get("/user/welcome", async (_req, res) => {
+  const profile = await prisma.profile.findUnique({ where: { id: 1 }, select: { name: true } });
+  res.json({ name: profile?.name ?? null } satisfies WelcomeDto);
 });
 
 authRouter.post("/user/logout", (_req, res) => {

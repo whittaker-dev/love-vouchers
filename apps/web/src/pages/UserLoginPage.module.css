@@ -48,6 +48,11 @@
   font-size: var(--text-3xl);
 }
 
+/* A transform needs a box: an inline span would ignore the slide-up. */
+.titleText {
+  display: inline-block;
+}
+
 .subtitle {
   margin-top: var(--space-2);
   color: var(--color-text-soft);

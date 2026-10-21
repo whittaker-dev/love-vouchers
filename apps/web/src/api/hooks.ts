@@ -16,6 +16,7 @@ import type {
   ViewerDto,
   VoucherDto,
   VoucherInput,
+  WelcomeDto,
   WishDto,
   WishInput,
   WishQuotaDto,
@@ -27,6 +28,7 @@ import { ApiError, json, request } from "./client";
 export const queryKeys = {
   me: ["me"] as const,
   viewer: ["viewer"] as const,
+  welcome: ["welcome"] as const,
   profile: ["profile"] as const,
   quota: ["quota"] as const,
   greeting: ["greeting"] as const,
@@ -60,6 +62,11 @@ export function useViewer() {
     queryFn: () => orNullWhenLoggedOut(() => request<ViewerDto>("/auth/viewer")),
     staleTime: 5 * 60 * 1000,
   });
+}
+
+/** Her name for the login page; public, so it works before she logs in. */
+export function useWelcome() {
+  return useQuery({ queryKey: queryKeys.welcome, queryFn: () => request<WelcomeDto>("/auth/user/welcome") });
 }
 
 export function useUserLogin() {
