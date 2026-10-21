@@ -240,9 +240,40 @@
     margin-top: var(--space-6);
   }
 
+  /* The button and the days badge share one full-width row; the badge stacks its text to fit beside it. */
+  .heroActions {
+    align-self: stretch;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
   .cta {
     flex: 1;
     justify-content: center;
+    min-width: 0;
+    padding: 14px 16px;
+    white-space: nowrap;
+  }
+
+  .days {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+  }
+
+  .daysText {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+
+  .daysNumber {
+    font-size: var(--text-base);
+  }
+
+  .daysLabel {
+    color: var(--color-text-soft);
+    font-size: 0.7rem;
+    white-space: nowrap;
   }
 
   .vouchers {
@@ -264,6 +295,13 @@
 
   .wishWrap {
     margin-top: var(--space-10);
+  }
+}
+
+/* The narrowest phones (320px): drop the bouncing arrow so the label keeps its padding beside the badge. */
+@media (max-width: 359px) {
+  .cta span {
+    display: none;
   }
 }
 

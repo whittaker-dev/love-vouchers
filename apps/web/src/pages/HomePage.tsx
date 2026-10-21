@@ -139,7 +139,10 @@ export function HomePage() {
             </motion.a>
             {days >= 0 && (
               <span className={styles.days}>
-                💞 <CountUp value={days} className={styles.daysNumber} /> ngày bên nhau
+                💞
+                <span className={styles.daysText}>
+                  <CountUp value={days} className={styles.daysNumber} /> <span className={styles.daysLabel}>ngày bên nhau</span>
+                </span>
               </span>
             )}
           </motion.div>
