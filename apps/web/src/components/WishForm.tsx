@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { forwardRef, useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import type { VoucherDto } from "@love/shared";
+import type { VoucherDto, WishQuotaDto } from "@love/shared";
 import { duration, easeOut, spring } from "../lib/motion";
 import { Button } from "./Button";
 import { FormError } from "./Field";
@@ -35,11 +35,15 @@ interface WishFormProps {
   onSubmit: () => void;
   sending: boolean;
   error: string | null;
+  /** This month's allowance; shown as a pill and enforced by disabling the button at 0. */
+  quota: WishQuotaDto | undefined;
+  /** When set, sending is not possible (e.g. the admin is only previewing); shown instead. */
+  blockedReason: string | null;
 }
 
 /** "Danh sách ước": the picked vouchers as chips, an optional note, and the send button. */
 export const WishForm = forwardRef<HTMLElement, WishFormProps>(function WishForm(
-  { selected, message, onMessageChange, onRemove, onSubmit, sending, error },
+  { selected, message, onMessageChange, onRemove, onSubmit, sending, error, quota, blockedReason },
   ref,
 ) {
   const chipBoxControls = useAnimationControls();
@@ -52,8 +56,12 @@ export const WishForm = forwardRef<HTMLElement, WishFormProps>(function WishForm
     if (selected.length > 0) setEmptyHint(false);
   }, [selected.length, heartControls]);
 
+  const outOfSends = quota !== undefined && quota.remaining === 0;
+  const notice = blockedReason ?? (outOfSends ? outOfSendsMessage(quota) : null);
+
   function submit(event: FormEvent) {
     event.preventDefault();
+    if (notice) return;
     if (selected.length === 0) {
       setEmptyHint(true);
       void chipBoxControls.start({ x: [0, -8, 8, -5, 4, 0], transition: { duration: 0.4 } });
@@ -82,6 +90,7 @@ export const WishForm = forwardRef<HTMLElement, WishFormProps>(function WishForm
           <p className="eyebrow">Danh sách ước</p>
           <h2 className={styles.title}>Gửi một điều ước nhỏ</h2>
         </div>
+        {quota && <QuotaPill quota={quota} />}
       </motion.div>
 
       <form className={styles.form} onSubmit={submit} noValidate>
@@ -153,8 +162,22 @@ export const WishForm = forwardRef<HTMLElement, WishFormProps>(function WishForm
 
         <FormError message={error} />
 
+        <AnimatePresence initial={false}>
+          {notice && (
+            <motion.p
+              className={styles.notice}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: duration.base, ease: easeOut }}
+            >
+              {notice}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
         <motion.div variants={partVariants}>
-          <Button type="submit" size="lg" block loading={sending}>
+          <Button type="submit" size="lg" block loading={sending} disabled={notice !== null}>
             Gửi điều ước <span aria-hidden>♡</span>
           </Button>
         </motion.div>
@@ -165,3 +188,32 @@ export const WishForm = forwardRef<HTMLElement, WishFormProps>(function WishForm
     </motion.section>
   );
 });
+
+function outOfSendsMessage(quota: WishQuotaDto): string {
+  const [year, month, day] = quota.resetsOn.split("-").map(Number);
+  return `Tháng này em gửi đủ ${quota.limit} lần rồi. Quay lại vào ${day}/${month}/${year} nha 💕`;
+}
+
+/** "Còn 2/3 lượt tháng 10": the number flips when it changes. */
+function QuotaPill({ quota }: { quota: WishQuotaDto }) {
+  const month = Number(quota.month.slice(5));
+  return (
+    <span className={styles.quota} data-empty={quota.remaining === 0 || undefined}>
+      Còn{" "}
+      <span className={styles.quotaNumber}>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span
+            key={quota.remaining}
+            initial={{ y: 12, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -12, opacity: 0 }}
+            transition={spring.snappy}
+          >
+            {quota.remaining}
+          </motion.span>
+        </AnimatePresence>
+      </span>
+      /{quota.limit} lượt tháng {month}
+    </span>
+  );
+}

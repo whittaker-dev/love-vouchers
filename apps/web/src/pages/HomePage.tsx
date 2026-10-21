@@ -1,10 +1,11 @@
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
-import { useProfile, useSendWish, useVouchers } from "../api/hooks";
+import { useProfile, useQuota, useSendWish, useViewer, useVouchers } from "../api/hooks";
 import { CountUp } from "../components/CountUp";
 import { FloatingHearts } from "../components/FloatingHearts";
 import { HeroArt } from "../components/HeroArt";
 import { RevealText } from "../components/RevealText";
+import { ScratchCard } from "../components/ScratchCard";
 import { SelectionBar } from "../components/SelectionBar";
 import { EmptyState, ErrorState, Skeleton } from "../components/StateViews";
 import { SuccessOverlay } from "../components/SuccessOverlay";
@@ -21,6 +22,8 @@ export function HomePage() {
   const profile = useProfile();
   const vouchers = useVouchers();
   const sendWish = useSendWish();
+  const quota = useQuota();
+  const viewer = useViewer();
 
   /** Picked voucher ids, in the order she tapped them (that is the chip order). */
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -155,6 +158,8 @@ export function HomePage() {
 
       <div className={`container ${styles.divider}`} />
 
+      <ScratchCard />
+
       <section
         ref={vouchersRef}
         id="vouchers"
@@ -241,6 +246,10 @@ export function HomePage() {
           onSubmit={submitWish}
           sending={sendWish.isPending}
           error={sendWish.error?.message ?? null}
+          quota={quota.data}
+          blockedReason={
+            viewer.data?.role === "admin" ? "Anh đang xem thử trang của em, chỉ em mới gửi được điều ước nha 👀" : null
+          }
         />
       </div>
 

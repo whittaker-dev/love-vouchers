@@ -1,4 +1,4 @@
-import type { VoucherColor } from "./schemas.js";
+import type { OccasionKind, OccasionTheme, VoucherColor } from "./schemas.js";
 
 // Response shapes returned by the API. Dates are ISO strings; date-only fields are "YYYY-MM-DD".
 
@@ -63,4 +63,69 @@ export interface ApiErrorBody {
   error: string;
   /** Field → message, present for validation errors. */
   fields?: Record<string, string>;
+}
+
+/** Who is looking at her pages: she (user) or the admin previewing them. */
+export interface ViewerDto {
+  role: "user" | "admin";
+  email: string;
+}
+
+/** Her monthly sending allowance (calendar month, Vietnam time). */
+export interface WishQuotaDto {
+  /** "2026-10" */
+  month: string;
+  limit: number;
+  used: number;
+  remaining: number;
+  /** First day of next month, "YYYY-MM-DD". */
+  resetsOn: string;
+}
+
+export interface SettingsDto {
+  monthlyWishLimit: number;
+  /** Usage of the current month, for the admin's overview. */
+  quota: WishQuotaDto;
+}
+
+export interface OccasionDto {
+  id: string;
+  name: string;
+  emoji: string;
+  theme: OccasionTheme;
+  kind: OccasionKind;
+  day: number | null;
+  month: number | null;
+  daysBefore: number;
+  daysAfter: number;
+  message: string;
+  isEnabled: boolean;
+  /** Next solar date it falls on ("YYYY-MM-DD"), or null when unknown (e.g. birthday not set). */
+  nextDate: string | null;
+  /** Days from today to nextDate (0 = today). */
+  daysUntil: number | null;
+}
+
+/** The occasion her pages are themed for right now, with the banner text already personalised. */
+export interface ActiveOccasionDto {
+  id: string;
+  name: string;
+  emoji: string;
+  theme: OccasionTheme;
+  message: string;
+  /** The day being celebrated ("YYYY-MM-DD"); may differ from today inside the before/after window. */
+  date: string;
+}
+
+export interface GreetingDto {
+  /** Vietnam date the greeting belongs to, "YYYY-MM-DD". Used to remember if today's card was scratched. */
+  date: string;
+  emoji: string;
+  text: string;
+}
+
+/** Her login as the admin sees it (never includes the password). */
+export interface UserAccountDto {
+  email: string;
+  createdAt: string;
 }

@@ -5,7 +5,7 @@ import { config } from "./config.js";
 import { errorHandler, notFound } from "./errors.js";
 import { adminRouter } from "./routes/admin.js";
 import { authRouter } from "./routes/auth.js";
-import { publicRouter } from "./routes/public.js";
+import { herRouter } from "./routes/her.js";
 
 export function createApp() {
   const app = express();
@@ -23,7 +23,7 @@ export function createApp() {
   });
   app.use("/api/auth", authRouter);
   app.use("/api/admin", adminRouter);
-  app.use("/api", publicRouter);
+  app.use("/api", herRouter);
 
   // Production: one service serves both the API and the built web app, so the browser sees a
   // single origin and the session cookie works without CORS, exactly like the Vite proxy in dev.

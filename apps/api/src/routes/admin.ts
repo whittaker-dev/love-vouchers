@@ -1,11 +1,19 @@
 import { Router } from "express";
-import { profileInputSchema, voucherInputSchema } from "@love/shared";
-import type { ProfileDto, VoucherDto, WishDto } from "@love/shared";
-import { requireAdmin } from "../auth.js";
+import {
+  occasionInputSchema,
+  profileInputSchema,
+  settingsInputSchema,
+  userCreateSchema,
+  voucherInputSchema,
+} from "@love/shared";
+import type { OccasionDto, ProfileDto, SettingsDto, UserAccountDto, VoucherDto, WishDto } from "@love/shared";
+import { hashPassword, requireAdmin } from "../auth.js";
 import { fromDateOnly } from "../dates.js";
 import { prisma } from "../db.js";
 import { HttpError } from "../errors.js";
 import { completeWish, resolveRedemption } from "../notifications.js";
+import { toOccasionDto } from "../occasions.js";
+import { currentQuota } from "../quota.js";
 import { toProfileDto, toVoucherDto, toWishDto, wishItemsInclude } from "../serializers.js";
 
 export const adminRouter = Router();
@@ -93,5 +101,84 @@ adminRouter.post("/redemptions/:id/complete", async (req, res) => {
 
 adminRouter.post("/redemptions/:id/cancel", async (req, res) => {
   await resolveRedemption(req.params.id, "cancel");
+  res.status(204).end();
+});
+
+// ── Occasions (themed days) ─────────────────────────────────────────────
+
+/** Birthday/anniversary take their date from the profile, so stored day/month are cleared. */
+function occasionData(input: ReturnType<typeof occasionInputSchema.parse>) {
+  const ownDate = input.kind === "solar" || input.kind === "lunar";
+  return { ...input, day: ownDate ? input.day : null, month: ownDate ? input.month : null };
+}
+
+adminRouter.get("/occasions", async (_req, res) => {
+  const [occasions, profile] = await Promise.all([
+    prisma.occasion.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.profile.findUnique({ where: { id: 1 } }),
+  ]);
+  const dtos = occasions.map((occasion) => toOccasionDto(occasion, profile));
+  // Soonest first; occasions without a known date (e.g. birthday not set yet) last.
+  dtos.sort((a, b) => (a.daysUntil ?? Infinity) - (b.daysUntil ?? Infinity));
+  res.json(dtos satisfies OccasionDto[]);
+});
+
+adminRouter.post("/occasions", async (req, res) => {
+  const input = occasionInputSchema.parse(req.body);
+  const [occasion, profile] = await Promise.all([
+    prisma.occasion.create({ data: occasionData(input) }),
+    prisma.profile.findUnique({ where: { id: 1 } }),
+  ]);
+  res.status(201).json(toOccasionDto(occasion, profile) satisfies OccasionDto);
+});
+
+adminRouter.put("/occasions/:id", async (req, res) => {
+  const input = occasionInputSchema.parse(req.body);
+  if (!(await prisma.occasion.count({ where: { id: req.params.id } }))) throw new HttpError(404, "Không tìm thấy dịp này");
+  const [occasion, profile] = await Promise.all([
+    prisma.occasion.update({ where: { id: req.params.id }, data: occasionData(input) }),
+    prisma.profile.findUnique({ where: { id: 1 } }),
+  ]);
+  res.json(toOccasionDto(occasion, profile) satisfies OccasionDto);
+});
+
+adminRouter.delete("/occasions/:id", async (req, res) => {
+  const { count } = await prisma.occasion.deleteMany({ where: { id: req.params.id } });
+  if (count === 0) throw new HttpError(404, "Không tìm thấy dịp này");
+  res.status(204).end();
+});
+
+// ── Settings ────────────────────────────────────────────────────────────
+
+adminRouter.get("/settings", async (_req, res) => {
+  const [settings, quota] = await Promise.all([prisma.appSetting.findUnique({ where: { id: 1 } }), currentQuota()]);
+  res.json({ monthlyWishLimit: settings?.monthlyWishLimit ?? 3, quota } satisfies SettingsDto);
+});
+
+adminRouter.put("/settings", async (req, res) => {
+  const input = settingsInputSchema.parse(req.body);
+  await prisma.appSetting.upsert({ where: { id: 1 }, create: { id: 1, ...input }, update: input });
+  res.json({ monthlyWishLimit: input.monthlyWishLimit, quota: await currentQuota() } satisfies SettingsDto);
+});
+
+// ── Her login (one only, created here, never from env) ──────────────────
+
+adminRouter.get("/user", async (_req, res) => {
+  const user = await prisma.user.findFirst();
+  res.json((user ? { email: user.email, createdAt: user.createdAt.toISOString() } : null) satisfies UserAccountDto | null);
+});
+
+/** Only while none exists: to change her login, the admin deletes it and creates a new one. */
+adminRouter.post("/user", async (req, res) => {
+  const { email, password } = userCreateSchema.parse(req.body);
+  if (await prisma.user.count()) throw new HttpError(409, "Đã có tài khoản cho em rồi. Xoá tài khoản cũ trước khi tạo mới");
+  const user = await prisma.user.create({ data: { email, passwordHash: await hashPassword(password) } });
+  res.status(201).json({ email: user.email, createdAt: user.createdAt.toISOString() } satisfies UserAccountDto);
+});
+
+/** Her open sessions stop working at once: requireUser/requireViewer check the account still exists. */
+adminRouter.delete("/user", async (_req, res) => {
+  const { count } = await prisma.user.deleteMany();
+  if (count === 0) throw new HttpError(404, "Chưa có tài khoản nào để xoá");
   res.status(204).end();
 });

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Link, NavLink, useNavigate } from "react-router";
+import { useEffect, useRef } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { useAdminWishes, useLogout, useMe } from "../api/hooks";
 import { spring } from "../lib/motion";
 import { AnimatedOutlet } from "./AnimatedOutlet";
@@ -9,6 +10,7 @@ import styles from "./AdminLayout.module.css";
 const TABS = [
   { to: "/admin", label: "Voucher", end: true },
   { to: "/admin/notifications", label: "Thông báo", end: false },
+  { to: "/admin/occasions", label: "Dịp lễ", end: false },
   { to: "/admin/profile", label: "Hồ sơ em", end: false },
   { to: "/admin/account", label: "Tài khoản", end: false },
 ];
@@ -20,6 +22,15 @@ export function AdminLayout() {
   const wishes = useAdminWishes();
   // Every item that still exists is waiting: handled ones are deleted.
   const pendingCount = wishes.data?.reduce((total, wish) => total + wish.items.length, 0) ?? 0;
+
+  // On phones the tab row scrolls sideways; keep the current tab in view after navigating.
+  const tabsRef = useRef<HTMLElement>(null);
+  const location = useLocation();
+  useEffect(() => {
+    tabsRef.current
+      ?.querySelector('[aria-current="page"]')
+      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [location.pathname]);
 
   function handleLogout() {
     logout.mutate(undefined, { onSuccess: () => navigate("/admin/login", { replace: true }) });
@@ -46,7 +57,7 @@ export function AdminLayout() {
             </Button>
           </div>
         </div>
-        <nav className={`container ${styles.tabs}`} aria-label="Quản trị">
+        <nav ref={tabsRef} className={`container ${styles.tabs}`} aria-label="Quản trị">
           {TABS.map((tab) => (
             <NavLink key={tab.to} to={tab.to} end={tab.end} className={styles.tab}>
               {({ isActive }) => (

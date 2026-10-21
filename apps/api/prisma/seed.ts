@@ -3,8 +3,8 @@ import { runFirstBootSetup } from "../src/bootstrap.js";
 import { prisma } from "../src/db.js";
 
 // `pnpm db:seed`: makes the single admin match ADMIN_* in .env (updated in place, never
-// duplicated: also the way to reset a forgotten password), then runs the same one-time setup
-// the API does on boot (profile and starter vouchers, each created at most once per database).
+// duplicated: also the way to reset a forgotten password), then runs the same
+// one-time setup the API does on boot (settings, profile, starter vouchers and occasions).
 
 async function syncAdminFromEnv() {
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();

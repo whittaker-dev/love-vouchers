@@ -1,9 +1,11 @@
 import { hashPassword } from "./auth.js";
 import { prisma } from "./db.js";
 import { Prisma } from "./generated/prisma/client.js";
-import { STARTER_PROFILE, starterVoucherRows } from "./starterData.js";
+import { STARTER_OCCASIONS, STARTER_PROFILE, starterVoucherRows } from "./starterData.js";
 
-// First-boot setup, run every time the API starts (index.ts) and by `pnpm db:seed`.
+// First-boot setup, run every time the API starts (index.ts) and by `pnpm db:seed`:
+// admin (from env), settings, her profile, starter vouchers and occasions. Her login is created
+// by the admin in the admin pages.
 // Each step does its work at most once per database, so restarts, redeploys and several
 // instances booting together never duplicate anything or undo the admin's edits.
 
@@ -22,6 +24,15 @@ async function ensureAdmin(): Promise<void> {
     console.log(`✔ Admin created: ${email}`);
   } catch (error) {
     // Another instance booting at the same moment created it first (unique email).
+    if (!isUniqueViolation(error)) throw error;
+  }
+}
+
+/** The single settings row (monthly wish limit). */
+async function ensureSettings(): Promise<void> {
+  try {
+    await prisma.appSetting.upsert({ where: { id: 1 }, create: { id: 1 }, update: {} });
+  } catch (error) {
     if (!isUniqueViolation(error)) throw error;
   }
 }
@@ -53,12 +64,27 @@ async function ensureStarterVouchers(): Promise<void> {
   }
 }
 
+/** Default occasions, created exactly once per database (same marker pattern as the vouchers). */
+async function ensureStarterOccasions(): Promise<void> {
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.setupStep.create({ data: { key: "starter-occasions" } });
+      const { count } = await tx.occasion.createMany({ data: STARTER_OCCASIONS });
+      console.log(`✔ ${count} starter occasions created`);
+    });
+  } catch (error) {
+    if (!isUniqueViolation(error)) throw error;
+  }
+}
+
 function isUniqueViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 }
 
 export async function runFirstBootSetup(): Promise<void> {
   await ensureAdmin();
+  await ensureSettings();
   await ensureProfile();
   await ensureStarterVouchers();
+  await ensureStarterOccasions();
 }

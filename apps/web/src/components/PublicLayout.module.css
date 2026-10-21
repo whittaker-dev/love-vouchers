@@ -79,12 +79,28 @@
   position: relative;
 }
 
-.tagline {
+.logout,
+.adminChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-heading);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
+}
+
+.logout:hover,
+.adminChip:hover {
+  border-color: var(--color-accent);
   color: var(--color-accent);
-  font-size: var(--text-2xs);
-  font-weight: var(--weight-heavy);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
 }
 
 .main {
@@ -124,7 +140,8 @@
 }
 
 @media (max-width: 760px) {
-  .tagline {
+  .logoutText,
+  .adminChipText {
     display: none;
   }
 }
@@ -137,7 +154,6 @@
   }
 
   .topbarInner {
-    justify-content: center;
     min-height: 56px;
   }
 

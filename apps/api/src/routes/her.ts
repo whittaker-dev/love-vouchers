@@ -1,16 +1,22 @@
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { wishInputSchema } from "@love/shared";
-import type { ProfileDto, VoucherDto, WishDto } from "@love/shared";
+import type { ActiveOccasionDto, GreetingDto, ProfileDto, VoucherDto, WishDto, WishQuotaDto } from "@love/shared";
+import { requireUser, requireViewer } from "../auth.js";
 import { todayInVietnam } from "../dates.js";
 import { prisma } from "../db.js";
 import { HttpError } from "../errors.js";
+import { greetingFor } from "../greetings.js";
+import { activeOccasion, previewOccasion } from "../occasions.js";
+import { consumeMonthlySend, currentQuota } from "../quota.js";
 import { toProfileDto, toVoucherDto, toWishDto, wishItemsInclude } from "../serializers.js";
 
-// Everything here is reachable without logging in: it is the girlfriend's side of the app.
-export const publicRouter = Router();
+// The girlfriend's side of the app. Reading needs her login (or the admin, previewing her pages);
+// sending a wish needs her login.
+export const herRouter = Router();
+herRouter.use(requireViewer);
 
-publicRouter.get("/profile", async (_req, res) => {
+herRouter.get("/profile", async (_req, res) => {
   const [profile, admin] = await Promise.all([
     prisma.profile.findUnique({ where: { id: 1 } }),
     prisma.admin.findFirst({ orderBy: { createdAt: "asc" } }),
@@ -19,7 +25,7 @@ publicRouter.get("/profile", async (_req, res) => {
   res.json(toProfileDto(profile, admin?.name ?? "Anh") satisfies ProfileDto);
 });
 
-publicRouter.get("/vouchers", async (_req, res) => {
+herRouter.get("/vouchers", async (_req, res) => {
   const vouchers = await prisma.voucher.findMany({
     where: {
       isActive: true,
@@ -30,7 +36,7 @@ publicRouter.get("/vouchers", async (_req, res) => {
   res.json(vouchers.map(toVoucherDto) satisfies VoucherDto[]);
 });
 
-publicRouter.get("/wishes", async (_req, res) => {
+herRouter.get("/wishes", async (_req, res) => {
   const wishes = await prisma.wishRequest.findMany({
     include: wishItemsInclude,
     orderBy: { createdAt: "desc" },
@@ -39,17 +45,34 @@ publicRouter.get("/wishes", async (_req, res) => {
   res.json(wishes.map(toWishDto) satisfies WishDto[]);
 });
 
-// Needs no login and writes to the database, so cap it to stop accidental (or playful) spam.
+herRouter.get("/wishes/quota", async (_req, res) => {
+  res.json((await currentQuota()) satisfies WishQuotaDto);
+});
+
+herRouter.get("/occasions/active", async (req, res) => {
+  // ?preview=<id> lets the admin see any occasion's theme today ("Xem thử").
+  const previewId = typeof req.query.preview === "string" ? req.query.preview : null;
+  const occasion = previewId && req.adminId ? await previewOccasion(previewId) : await activeOccasion();
+  res.json(occasion satisfies ActiveOccasionDto | null);
+});
+
+herRouter.get("/greetings/today", (_req, res) => {
+  res.json(greetingFor() satisfies GreetingDto);
+});
+
+// The monthly quota is the real limit; this only stops a stuck button from hammering the API.
 const wishLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   message: { error: "Em gửi nhiều quá rồi, nghỉ một chút rồi gửi tiếp nhé 💕" },
 });
 
-publicRouter.post("/wishes", wishLimiter, async (req, res) => {
+herRouter.post("/wishes", requireUser, wishLimiter, async (req, res) => {
   const input = wishInputSchema.parse(req.body);
 
   const wish = await prisma.$transaction(async (tx) => {
+    // Rolled back with everything else if a voucher below turns out to be unavailable.
+    await consumeMonthlySend(tx);
     const vouchers = await tx.voucher.findMany({ where: { id: { in: input.voucherIds } } });
     const today = todayInVietnam();
     for (const id of input.voucherIds) {

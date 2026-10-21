@@ -1,6 +1,8 @@
 # 💌 Love Vouchers
 
-Một trang web nhỏ để **tặng voucher tình yêu** cho bạn gái: anh (admin) tạo các voucher như *trà sữa*, *massage*, *một buổi hẹn hò*… Em mở trang, **chạm chọn bao nhiêu voucher cũng được**, viết vài dòng nhắn rồi bấm **Gửi điều ước**. Điều ước hiện thành **thông báo** trong trang quản trị; anh vào xem mỗi ngày, làm xong voucher nào thì bấm **Xong** và thông báo đó được xoá.
+Một trang web nhỏ để **tặng voucher tình yêu** cho bạn gái: anh (admin) tạo các voucher như *trà sữa*, *massage*, *một buổi hẹn hò*… Em đăng nhập bằng tài khoản anh tạo cho, **chạm chọn bao nhiêu voucher cũng được**, viết vài dòng nhắn rồi bấm **Gửi điều ước** (mặc định 3 lần mỗi tháng). Điều ước hiện thành **thông báo** trong trang quản trị; anh vào xem mỗi ngày, làm xong voucher nào thì bấm **Xong** và thông báo đó được xoá.
+
+Mỗi ngày em có một **thẻ cào lời chúc** mới; vào các dịp (sinh nhật em, kỷ niệm, Valentine, Tết, Trung thu, Giáng sinh…) trang tự đổi **giao diện theo dịp**.
 
 Toàn bộ giao diện bằng tiếng Việt, tông hồng, ưu tiên điện thoại, và mọi thao tác đều có animation (Framer Motion). Không gửi email, không upload file: avatar của em và biểu tượng voucher đều là **emoji**.
 
@@ -24,11 +26,12 @@ Toàn bộ giao diện bằng tiếng Việt, tông hồng, ưu tiên điện th
 
 ## Tính năng
 
-**Phía em (không cần đăng nhập)**
+**Phía em (đăng nhập ở `/dang-nhap` bằng tài khoản anh tạo)**
 
 | Trang | Đường dẫn | Nội dung |
 | --- | --- | --- |
-| Voucher | `/` | Màn mở đầu (trái tim tự vẽ → lưới ô vuông tắt dần, ~2s) → hero có parallax → lưới voucher chọn nhiều → form "Gửi một điều ước nhỏ" (chip các voucher đã chọn + lời nhắn) → màn "Ôi, em đáng yêu quá đi!" |
+| Đăng nhập | `/dang-nhap` | "Chào em 💕": email + mật khẩu. Chưa đăng nhập thì mọi trang của em đều chuyển về đây |
+| Voucher | `/` | Màn mở đầu (trái tim tự vẽ → lưới ô vuông tắt dần, ~2s) → hero có parallax → **thẻ cào lời chúc hôm nay** → lưới voucher chọn nhiều → form "Gửi một điều ước nhỏ" (chip voucher đã chọn + lời nhắn + **"Còn 2/3 lượt tháng 10"**) → màn "Ôi, em đáng yêu quá đi!" |
 | Về em | `/em` | Emoji đại diện, tên, biệt danh, lời giới thiệu, sinh nhật (đếm ngược), số ngày bên nhau, những thứ em thích |
 | Đã gửi | `/da-chon` | Những điều ước **anh chưa thực hiện**. Anh làm xong cái nào thì cái đó biến mất |
 
@@ -38,12 +41,21 @@ Toàn bộ giao diện bằng tiếng Việt, tông hồng, ưu tiên điện th
 | --- | --- | --- |
 | Voucher | `/admin` | Danh sách, bật/ẩn, sửa, xoá; nút **+ Thêm voucher** (form có xem trước trực tiếp) |
 | Thông báo | `/admin/notifications` | Các điều ước em gửi (badge đỏ = số việc đang chờ). Từng voucher: **Xong ✓** hoặc **Huỷ** (trả lại lượt); cả điều ước: **Xong hết** |
-| Hồ sơ em | `/admin/profile` | Chọn **emoji đại diện**, sửa tên, biệt danh, lời giới thiệu, sinh nhật, ngày yêu, sở thích |
-| Tài khoản | `/admin/account` | Đổi mật khẩu |
+| Dịp lễ | `/admin/occasions` | Các dịp đổi giao diện trang em: bật/tắt, sửa tên, emoji, hiệu ứng, ngày (dương lịch / **âm lịch** / sinh nhật em / ngày yêu), số ngày hiện trước/sau, lời chúc; **Xem thử**; thêm dịp riêng |
+| Hồ sơ em | `/admin/profile` | Chọn **emoji đại diện**, sửa tên, biệt danh, lời giới thiệu, sinh nhật, ngày yêu (bộ chọn ngày riêng), sở thích |
+| Tài khoản | `/admin/account` | **Tạo tài khoản cho em** (chỉ 1; muốn đổi thì xoá rồi tạo mới), **giới hạn gửi mỗi tháng**, đổi mật khẩu của anh |
 
 Mỗi voucher có: emoji, tên, mô tả, giá trị (vd `50.000đ`), điều kiện, màu thẻ, **số lượt** (hoặc không giới hạn), **hạn sử dụng**, thứ tự hiển thị, bật/ẩn. Voucher hết lượt sẽ hiện "Hết lượt rồi 🥲" và không chọn được; voucher hết hạn sẽ tự ẩn.
 
 **Thông báo được xử lý là bị xoá khỏi database**, nên dữ liệu luôn chỉ gồm những việc còn đang chờ. Số lần mỗi voucher đã được dùng được lưu riêng (`usedCount`) nên giới hạn lượt vẫn đúng sau khi xoá.
+
+**Giới hạn gửi mỗi tháng:** tính theo lần bấm "Gửi điều ước" (một lần gửi nhiều voucher vẫn là 1 lần), theo tháng giờ Việt Nam, tự làm mới ngày 1. Huỷ voucher không hoàn lại lượt gửi. Số lần chỉnh ở `/admin/account` (mặc định 3).
+
+**Tài khoản em:** chỉ có **một**, do anh tạo ở `/admin/account` (không lấy từ `.env`). Xoá tài khoản thì phiên đăng nhập của em hết hiệu lực ngay. Khi anh đang đăng nhập admin, anh cũng xem được trang của em (nút "Xem trang của em"), nhưng chỉ em mới gửi được điều ước.
+
+**Thẻ cào lời chúc:** 119 câu chúc soạn sẵn, mỗi ngày một câu, xoay vòng nên một câu chỉ lặp lại sau đúng 119 ngày (`apps/api/src/greetings.ts`).
+
+**Giao diện theo dịp:** ngày âm lịch (Tết, Thất tịch, Trung thu) được đổi sang dương lịch mỗi năm bằng thuật toán thiên văn (Hồ Ngọc Đức, múi giờ +7; đã đối chiếu Tết 2024–2027, Thất tịch, Trung thu 2024–2026). Hai dịp trùng ngày thì sinh nhật em > kỷ niệm > dịp lễ.
 
 ## Công nghệ
 
@@ -68,17 +80,21 @@ love-vouchers/
 │   │   ├── prisma/             # schema.prisma, migrations/, seed.ts
 │   │   ├── prisma7.config.ts   # Prisma 7 đọc DATABASE_URL ở đây (không còn trong schema)
 │   │   └── src/
-│   │       ├── routes/         # public.ts (phía em), auth.ts, admin.ts
+│   │       ├── routes/         # her.ts (phía em), auth.ts (2 vai trò: admin / em), admin.ts
 │   │       ├── app.ts          # ghép route; khi chạy thật thì phục vụ luôn web đã build
 │   │       ├── bootstrap.ts    # seed tự động lúc khởi động (admin, hồ sơ, voucher ban đầu), mỗi thứ đúng 1 lần
 │   │       ├── starterData.ts  # 30 voucher ban đầu + hồ sơ mặc định
 │   │       ├── notifications.ts # Xong / Huỷ / Xong hết = xoá thông báo
+│   │       ├── quota.ts        # giới hạn gửi mỗi tháng
+│   │       ├── occasions.ts    # dịp nào đang diễn ra, ngày kế tiếp
+│   │       ├── lunar.ts        # đổi âm lịch → dương lịch
+│   │       ├── greetings.ts    # 119 lời chúc + xoay vòng theo ngày
 │   │       ├── config.ts       # đọc + kiểm tra biến môi trường, sai là dừng ngay khi khởi động
 │   │       └── generated/      # Prisma Client (tự sinh, không commit)
 │   └── web/                    # React app
 │       └── src/
 │           ├── api/            # client.ts (fetch) + hooks.ts (mọi React Query hook)
-│           ├── components/     # VoucherCard, WishForm, IntroLoader, HeroArt, EmojiPicker, …
+│           ├── components/     # VoucherCard, WishForm, ScratchCard, OccasionLayer, DatePicker, …
 │           ├── pages/          # trang của em + pages/admin/*
 │           ├── lib/            # motion.ts (token chuyển động), parallax.ts, format.ts, …
 │           └── styles/tokens.css  # token màu / chữ / khoảng cách
@@ -150,11 +166,11 @@ Lệnh này build `packages/shared` rồi chạy song song: shared (watch), API 
 
 | Gì | Ở đâu |
 | --- | --- |
-| Trang của em | http://localhost:5173 |
 | Trang quản trị | http://localhost:5173/admin (đăng nhập bằng `ADMIN_EMAIL` / `ADMIN_PASSWORD` trong `.env`) |
+| Trang của em | http://localhost:5173 (đăng nhập bằng tài khoản anh tạo ở `/admin/account`) |
 | Xem DB | `pnpm db:studio` |
 
-Thử luồng chính: mở trang em → chọn 2–3 voucher → viết lời nhắn → **Gửi điều ước** → vào `/admin/notifications` thấy thông báo → bấm **Xong ✓** từng voucher (hoặc **Xong hết**) → thông báo biến mất.
+Thử luồng chính: vào `/admin/account` **tạo tài khoản cho em** → mở trang em ở cửa sổ ẩn danh, đăng nhập → cào thẻ lời chúc → chọn 2–3 voucher → viết lời nhắn → **Gửi điều ước** → vào `/admin/notifications` thấy thông báo → bấm **Xong ✓** từng voucher (hoặc **Xong hết**) → thông báo biến mất.
 
 > Mở trên điện thoại cùng mạng Wi-Fi: chạy `pnpm dev` như thường, rồi ở một terminal khác chạy `pnpm --filter @love/web exec vite --host --port 5174` và vào `http://<IP-máy-tính>:5174`.
 
@@ -171,8 +187,12 @@ Mỗi lần API khởi động, nó chạy `runFirstBootSetup()` (`apps/api/src/
 | Bước | Khi nào làm | Ghi chú |
 | --- | --- | --- |
 | Tạo admin từ `ADMIN_*` | Khi DB **chưa có admin nào** | Đã có admin thì bỏ qua (không ghi đè mật khẩu đã đổi trong trang quản trị) |
+| Tạo cài đặt (giới hạn 3 lần/tháng) | Khi **chưa có** | Sửa trong `/admin/account` |
 | Tạo hồ sơ em mặc định ("Bé Yêu" 🐐) | Khi **chưa có hồ sơ** | Sửa trong `/admin/profile` |
 | Tạo 30 voucher ban đầu (`starterData.ts`) | **Chỉ lần đầu tiên** | Đánh dấu bằng bảng `SetupStep`. Restart, deploy lại, hay xoá hết voucher rồi khởi động lại đều **không** seed lại, không bị trùng |
+| Tạo 12 dịp lễ mặc định (`starterData.ts`) | **Chỉ lần đầu tiên** | Cùng cơ chế đánh dấu như voucher |
+
+**Tài khoản em không được seed**: anh tạo nó trong trang quản trị.
 
 Nhiều bản app khởi động cùng lúc cũng an toàn: dấu "đã seed" và việc tạo voucher nằm chung một transaction, nên chỉ một bản làm được. (Đã test: 3 tiến trình khởi động cùng lúc trên DB trống → đúng 1 admin, 30 voucher.)
 
@@ -219,9 +239,13 @@ Các model (xem `apps/api/prisma/schema.prisma`):
 | `Admin` | Tài khoản anh (email, mật khẩu đã băm bcrypt). Luôn chỉ có 1 |
 | `Profile` | Hồ sơ em (có `avatarEmoji`), luôn chỉ có 1 dòng (`id = 1`) |
 | `Voucher` | Voucher; `quantity = null` là không giới hạn; `usedCount` là số lần đã dùng |
+| `User` | Tài khoản đăng nhập của em. Tối đa 1, do admin tạo |
 | `WishRequest` | Một thông báo = một lần em bấm "Gửi điều ước" (lời nhắn + các voucher) |
 | `Redemption` | Một voucher **đang chờ** trong thông báo. Xong hoặc Huỷ là bị xoá |
 | `SetupStep` | Đánh dấu các bước seed đã làm (vd `starter-vouchers`) để không làm lại |
+| `AppSetting` | Cài đặt, 1 dòng: `monthlyWishLimit` |
+| `MonthlyUsage` | Số lần em đã gửi theo tháng (`"2026-10"`) |
+| `Occasion` | Dịp lễ: emoji, hiệu ứng, loại ngày (`solar` / `lunar` / `birthday` / `anniversary`), ngày/tháng, số ngày hiện trước/sau, lời chúc |
 
 - Lượt còn lại = `quantity − usedCount`. Gửi điều ước thì `usedCount + 1` (kiểm tra và tăng trong một câu lệnh, nên hai lần gửi cùng lúc không thể lấy cùng một lượt cuối); **Huỷ** thì `usedCount − 1`; **Xong** thì giữ nguyên.
 - `Redemption` lưu **bản sao** tên + emoji của voucher, nên sửa hay xoá voucher không làm hỏng thông báo đang chờ.
@@ -237,14 +261,18 @@ Mọi route đều có tiền tố `/api`, trả JSON. Lỗi có dạng `{ "erro
 | Method | Đường dẫn | Ai | Làm gì |
 | --- | --- | --- | --- |
 | GET | `/health` | ai cũng được | kiểm tra sống (Render dùng làm health check) |
-| GET | `/profile` | ai cũng được | hồ sơ em + tên anh |
-| GET | `/vouchers` | ai cũng được | voucher đang bật và chưa hết hạn |
-| GET | `/wishes` | ai cũng được | các điều ước đang chờ |
-| POST | `/wishes` | ai cũng được | `{ voucherIds: string[], message }` → tạo thông báo (giới hạn 20 lần / 15 phút) |
-| POST | `/auth/login` | — | `{ email, password }` → đặt cookie (giới hạn 10 lần / 15 phút) |
-| POST | `/auth/logout` | — | xoá cookie |
+| POST | `/auth/login` · `/auth/logout` | — | đăng nhập / đăng xuất **admin** (giới hạn 10 lần sai / 15 phút) |
 | GET | `/auth/me` | admin | admin hiện tại |
-| PUT | `/auth/password` | admin | đổi mật khẩu |
+| PUT | `/auth/password` | admin | đổi mật khẩu admin |
+| POST | `/auth/user/login` · `/auth/user/logout` | — | đăng nhập / đăng xuất **em** |
+| GET | `/auth/viewer` | em hoặc admin | ai đang xem trang em (`role: "user" \| "admin"`) |
+| GET | `/profile` | em hoặc admin | hồ sơ em + tên anh |
+| GET | `/vouchers` | em hoặc admin | voucher đang bật và chưa hết hạn |
+| GET | `/wishes` | em hoặc admin | các điều ước đang chờ |
+| GET | `/wishes/quota` | em hoặc admin | lượt gửi tháng này: `{ limit, used, remaining, resetsOn }` |
+| POST | `/wishes` | **chỉ em** | `{ voucherIds: string[], message }` → tạo thông báo; trừ 1 lượt gửi tháng (409 khi hết) |
+| GET | `/greetings/today` | em hoặc admin | lời chúc hôm nay cho thẻ cào |
+| GET | `/occasions/active` | em hoặc admin | dịp đang diễn ra (hoặc `null`); admin thêm `?preview=<id>` để xem thử |
 | GET/POST | `/admin/vouchers` | admin | danh sách / tạo voucher |
 | GET/PUT/DELETE | `/admin/vouchers/:id` | admin | xem / sửa / xoá voucher |
 | PUT | `/admin/profile` | admin | cập nhật hồ sơ em |
@@ -252,6 +280,10 @@ Mọi route đều có tiền tố `/api`, trả JSON. Lỗi có dạng `{ "erro
 | POST | `/admin/wishes/:id/complete` | admin | **Xong hết**: xoá cả thông báo |
 | POST | `/admin/redemptions/:id/complete` | admin | **Xong**: xoá voucher khỏi thông báo, vẫn tính lượt |
 | POST | `/admin/redemptions/:id/cancel` | admin | **Huỷ**: xoá voucher khỏi thông báo và trả lại lượt |
+| GET/POST | `/admin/occasions` | admin | danh sách (kèm ngày kế tiếp) / thêm dịp |
+| PUT/DELETE | `/admin/occasions/:id` | admin | sửa / xoá dịp |
+| GET/PUT | `/admin/settings` | admin | giới hạn gửi mỗi tháng (+ số đã gửi tháng này) |
+| GET / POST / DELETE | `/admin/user` | admin | xem / tạo (409 nếu đã có) / xoá tài khoản em |
 
 Schema đầu vào nằm ở `packages/shared/src/schemas.ts`; kiểu dữ liệu trả về nằm ở `packages/shared/src/types.ts`.
 
@@ -288,9 +320,11 @@ Bộ đôi miễn phí: **Render** (chạy app) + **Supabase** (Postgres). App c
 
    `JWT_SECRET` được Render tự tạo; `COOKIE_SECURE=true` đã đặt sẵn.
 
-4. Chờ build xong. Lần khởi động đầu, container tự chạy migration rồi tự tạo admin, hồ sơ em và 30 voucher ban đầu. **Không cần chạy seed tay.**
+4. Chờ build xong. Lần khởi động đầu, container tự chạy migration rồi tự tạo admin, cài đặt, hồ sơ em, 30 voucher và 12 dịp lễ ban đầu. **Không cần chạy seed tay.**
 
-5. Mở `https://<tên-service>.onrender.com`, đăng nhập `/admin`, gửi thử một điều ước và xem ở **Thông báo**.
+5. Mở `https://<tên-service>.onrender.com/admin`, đăng nhập, vào **Tài khoản → Tạo tài khoản cho em**, rồi gửi email + mật khẩu đó cho em.
+
+6. Em mở `https://<tên-service>.onrender.com`, đăng nhập, gửi thử một điều ước; anh xem ở **Thông báo**.
 
 Từ đó mỗi lần push lên nhánh chính, Render tự deploy lại. Migration mới tự chạy khi container khởi động; seed **không** chạy lại.
 
@@ -305,15 +339,6 @@ Từ đó mỗi lần push lên nhánh chính, Render tự deploy lại. Migrati
 | Health Check Path | `/api/health` |
 | Environment | `DATABASE_URL`, `JWT_SECRET` (≥ 32 ký tự), `COOKIE_SECURE=true`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` |
 
-### FE trên Vercel + BE trên Render (tuỳ chọn)
-
-Service Render ở trên **đã phục vụ cả giao diện**, nên không bắt buộc dùng Vercel. Nếu muốn giao diện chạy từ CDN của Vercel:
-
-1. Vercel → **Add New Project** → chọn repo → **Root Directory: `apps/web`**. Framework Vite, build command và output directory được lấy từ `apps/web/vercel.json`. Không cần biến môi trường nào.
-2. Mở `apps/web/vercel.json`, đặt `destination` của rule `/api/:path*` thành **URL thật của service Render** (mặc định đang là `https://love-vouchers.onrender.com`; Render thêm hậu tố nếu tên bị trùng), rồi push.
-
-Vercel chuyển tiếp `/api/*` sang Render nên trình duyệt vẫn chỉ thấy một domain, cookie đăng nhập hoạt động bình thường. Rule còn lại trả `index.html` cho mọi đường dẫn như `/em` hay `/admin`. Lưu ý: khi Render free đang ngủ, request API đầu tiên vẫn phải chờ nó thức dậy (~1 phút); dịch vụ ping ở trên giúp tránh việc này.
-
 > Trang của em **không có mật khẩu**: ai có link đều xem được và gửi được điều ước (đã có giới hạn số lần gửi). Hãy chỉ gửi link cho em thôi nhé.
 
 ## Xử lý sự cố
@@ -322,6 +347,9 @@ Vercel chuyển tiếp `/api/*` sang Render nên trình duyệt vẫn chỉ th�
 | --- | --- |
 | `Invalid environment configuration` khi chạy API | Thiếu hoặc sai biến trong `.env` (hoặc trong dashboard Render); dòng log cho biết biến nào. `JWT_SECRET` phải ≥ 32 ký tự. |
 | Log có `No admin account yet` | Chưa đặt `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Đặt rồi khởi động lại. |
+| Em không đăng nhập được | Kiểm tra `/admin/account` đã có tài khoản chưa. Quên mật khẩu thì xoá tài khoản rồi tạo mới. |
+| Em báo "Tháng này em gửi đủ 3 lần rồi" | Đúng giới hạn tháng. Tăng ở `/admin/account → Giới hạn gửi mỗi tháng` nếu muốn. |
+| Muốn xem trước giao diện một dịp | `/admin/occasions` → **Xem thử** (cần đang đăng nhập admin). |
 | Đăng nhập báo sai email / mật khẩu | Mật khẩu trong DB là cái lúc admin được tạo. Sửa `ADMIN_*` trong `.env` rồi chạy `pnpm db:seed` để đặt lại. Sai 10 lần trong 15 phút sẽ bị chặn tạm thời. |
 | `Can't reach database server at localhost:5433` | Chưa chạy `pnpm infra:up`, hoặc Docker Desktop đang tắt. |
 | Cổng 5173 / 4000 / 5433 đã bị dùng | Tắt chương trình đang chiếm cổng (`lsof -i :5173`) hoặc đổi cổng trong `vite.config.ts` / `.env` / `docker-compose.yml`. |
@@ -329,6 +357,4 @@ Vercel chuyển tiếp `/api/*` sang Render nên trình duyệt vẫn chỉ th�
 | Render: lỗi SSL / certificate khi kết nối DB | Thiếu `?uselibpqcompat=true&sslmode=require` ở cuối `DATABASE_URL`. |
 | Render: không kết nối được DB (timeout / `ENETUNREACH`) | Đang dùng "Direct connection" của Supabase (chỉ IPv6); đổi sang **Session pooler**. |
 | Đăng nhập xong vẫn bị đá ra | Đang chạy http nhưng `COOKIE_SECURE=true`. Ở local để `false`. |
-| Vercel build báo `Cannot find module '@love/shared'` | Root Directory phải là `apps/web` và dùng script `build` có sẵn (nó build `packages/shared` trước). Đừng đổi build command thành `vite build`. |
-| Vercel: trang mở được nhưng không có voucher / không đăng nhập được | `destination` của `/api/:path*` trong `apps/web/vercel.json` chưa phải URL Render thật, hoặc service Render đang lỗi / đang ngủ. |
 | Muốn làm lại dữ liệu từ đầu | `pnpm db:reset` (xoá sạch!) |

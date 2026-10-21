@@ -7,7 +7,9 @@ import type { VoucherColor, VoucherDto, VoucherInput } from "@love/shared";
 import { useAdminVoucher, useSaveVoucher } from "../../api/hooks";
 import { Button } from "../../components/Button";
 import { Field, FormError, Input, Textarea } from "../../components/Field";
+import { DatePicker } from "../../components/DatePicker";
 import { EmojiPicker } from "../../components/EmojiPicker";
+import { todayDateOnly } from "../../lib/format";
 import { ErrorState, LoadingText } from "../../components/StateViews";
 import { Switch } from "../../components/Switch";
 import { VoucherCard } from "../../components/VoucherCard";
@@ -183,11 +185,12 @@ function VoucherEditor({ id, initial, used = 0 }: VoucherEditorProps) {
             </Field>
             <Field label="Hạn sử dụng" hint="Để trống = không hết hạn" error={errors.expiresAt}>
               {(fieldId) => (
-                <Input
+                <DatePicker
                   id={fieldId}
-                  type="date"
-                  value={form.expiresAt}
-                  onChange={(event) => set("expiresAt", event.target.value)}
+                  value={form.expiresAt || null}
+                  onChange={(date) => set("expiresAt", date ?? "")}
+                  placeholder="Không hết hạn"
+                  min={todayDateOnly()}
                 />
               )}
             </Field>

@@ -1,11 +1,12 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router";
-import { useProfile, useVouchers } from "../api/hooks";
+import { Link, NavLink, useNavigate } from "react-router";
+import { useProfile, useUserLogout, useViewer, useVouchers } from "../api/hooks";
 import { IntroContext } from "../lib/intro";
 import { duration, easeOut, spring } from "../lib/motion";
 import { AnimatedOutlet } from "./AnimatedOutlet";
 import { IntroLoader } from "./IntroLoader";
+import { OccasionLayer } from "./OccasionLayer";
 import { ScrollProgress } from "./ScrollProgress";
 import styles from "./PublicLayout.module.css";
 
@@ -84,9 +85,11 @@ export function PublicLayout() {
                 </NavLink>
               ))}
             </nav>
-            <span className={styles.tagline}>Làm bằng cả trái tim</span>
+            <SessionControl />
           </div>
         </motion.header>
+
+        <OccasionLayer play={introDone} />
 
         <main className={styles.main}>
           <AnimatedOutlet />
@@ -135,5 +138,34 @@ export function PublicLayout() {
         </motion.footer>
       </div>
     </IntroContext.Provider>
+  );
+}
+
+/** Top-right corner: her logout, or a reminder that the admin is only previewing her page. */
+function SessionControl() {
+  const viewer = useViewer();
+  const logout = useUserLogout();
+  const navigate = useNavigate();
+
+  if (viewer.data?.role === "admin") {
+    return (
+      <Link to="/admin" className={styles.adminChip}>
+        👀 <span className={styles.adminChipText}>Đang xem với quyền admin</span>
+      </Link>
+    );
+  }
+  return (
+    <motion.button
+      type="button"
+      className={styles.logout}
+      onClick={() => logout.mutate(undefined, { onSuccess: () => navigate("/dang-nhap", { replace: true }) })}
+      disabled={logout.isPending}
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.94 }}
+      aria-label="Đăng xuất"
+    >
+      <span aria-hidden>↪</span>
+      <span className={styles.logoutText}>Đăng xuất</span>
+    </motion.button>
   );
 }

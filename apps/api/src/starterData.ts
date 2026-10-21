@@ -1,4 +1,5 @@
 import { VOUCHER_COLORS } from "@love/shared";
+import type { OccasionKind, OccasionTheme } from "@love/shared";
 
 // Content created once on the first boot of a fresh database (see bootstrap.ts). After that the
 // admin owns it: edits and deletes in the admin pages are never undone by a restart or redeploy.
@@ -53,3 +54,32 @@ export const STARTER_PROFILE = {
   bio: "Người con gái đáng yêu nhất thế giới.",
   favorites: ["Trà sữa", "Phim Hàn", "Mèo", "Đi biển"],
 };
+
+/**
+ * Occasions created once on first boot. "{name}" in a message becomes her nickname.
+ * Lunar dates (Tết, Thất tịch, Trung thu) are converted to the right solar day every year.
+ */
+export const STARTER_OCCASIONS: {
+  name: string;
+  emoji: string;
+  theme: OccasionTheme;
+  kind: OccasionKind;
+  day: number | null;
+  month: number | null;
+  daysBefore: number;
+  daysAfter: number;
+  message: string;
+}[] = [
+  { name: "Sinh nhật em", emoji: "🎂", theme: "confetti", kind: "birthday", day: null, month: null, daysBefore: 0, daysAfter: 0, message: "Chúc mừng sinh nhật {name}! Tuổi mới thật nhiều niềm vui, và mãi là cô gái của anh 🎂" },
+  { name: "Kỷ niệm yêu nhau", emoji: "💞", theme: "hearts", kind: "anniversary", day: null, month: null, daysBefore: 0, daysAfter: 0, message: "Thêm một năm bên nhau rồi {name} ơi. Cảm ơn em đã chọn anh 💞" },
+  { name: "Tết Dương lịch", emoji: "🎆", theme: "fireworks", kind: "solar", day: 1, month: 1, daysBefore: 1, daysAfter: 0, message: "Chúc mừng năm mới {name}! Năm nay mình lại thương nhau nhiều hơn nha 🎆" },
+  { name: "Valentine", emoji: "💘", theme: "hearts", kind: "solar", day: 14, month: 2, daysBefore: 0, daysAfter: 0, message: "Valentine vui vẻ nha {name}! Anh thương em nhất trên đời 💘" },
+  { name: "Tết Nguyên Đán", emoji: "🧧", theme: "blossoms", kind: "lunar", day: 1, month: 1, daysBefore: 2, daysAfter: 4, message: "Chúc mừng năm mới {name}! An khang, hạnh phúc, và được anh lì xì thật to 🧧" },
+  { name: "Quốc tế Phụ nữ", emoji: "💐", theme: "petals", kind: "solar", day: 8, month: 3, daysBefore: 0, daysAfter: 0, message: "Chúc mừng 8/3, {name}! Hôm nay em là nữ hoàng, anh là người phục vụ 💐" },
+  { name: "Valentine Trắng", emoji: "🤍", theme: "hearts", kind: "solar", day: 14, month: 3, daysBefore: 0, daysAfter: 0, message: "Valentine Trắng nè {name}, anh đáp lại bằng cả trái tim 🤍" },
+  { name: "Thất tịch", emoji: "🌌", theme: "stars", kind: "lunar", day: 7, month: 7, daysBefore: 0, daysAfter: 0, message: "Ngưu Lang Chức Nữ một năm gặp một lần, còn mình thì ngày nào cũng gặp nha {name} 🌌" },
+  { name: "Tết Trung thu", emoji: "🏮", theme: "lanterns", kind: "lunar", day: 15, month: 8, daysBefore: 1, daysAfter: 0, message: "Trung thu vui vẻ {name}! Trăng tròn, bánh ngọt, và có anh bên cạnh 🏮" },
+  { name: "Phụ nữ Việt Nam", emoji: "🌷", theme: "petals", kind: "solar", day: 20, month: 10, daysBefore: 0, daysAfter: 0, message: "Chúc mừng 20/10, {name}! Mãi xinh đẹp, mãi vui vẻ, mãi là của anh 🌷" },
+  { name: "Halloween", emoji: "🎃", theme: "spooky", kind: "solar", day: 31, month: 10, daysBefore: 0, daysAfter: 0, message: "Happy Halloween {name}! Đừng sợ, có anh bảo vệ rồi 🎃" },
+  { name: "Giáng sinh", emoji: "🎄", theme: "snow", kind: "solar", day: 24, month: 12, daysBefore: 0, daysAfter: 1, message: "Giáng sinh an lành nha {name}! Món quà đẹp nhất của anh là em 🎄" },
+];

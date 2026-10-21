@@ -12,7 +12,7 @@ datasource db {
   provider = "postgresql"
 }
 
-/// The boyfriend. Only admins log in; the girlfriend's page is public.
+/// The boyfriend. Manages vouchers, her profile and occasions; handles notifications.
 model Admin {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -21,7 +21,15 @@ model Admin {
   createdAt    DateTime @default(now())
 }
 
-/// Single-row table (id is always 1): the girlfriend shown on the public page.
+/// Her login. At most one: the admin creates it, and to change it deletes it and creates a new one.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+/// Single-row table (id is always 1): the girlfriend shown on her pages.
 model Profile {
   id          Int       @id @default(1)
   name        String
@@ -88,4 +96,37 @@ model Redemption {
 model SetupStep {
   key    String   @id
   doneAt DateTime @default(now())
+}
+
+/// Single-row table (id is always 1) of settings the admin can change.
+model AppSetting {
+  id               Int @id @default(1)
+  /// How many wishes she can send per calendar month (Vietnam time).
+  monthlyWishLimit Int @default(3)
+}
+
+/// Wishes sent per month ("2026-10"). Stored, not counted, because handled wishes are deleted.
+model MonthlyUsage {
+  month     String @id
+  wishCount Int    @default(0)
+}
+
+/// A dated event that switches her pages to a themed look (particles + banner).
+model Occasion {
+  id         String   @id @default(cuid())
+  name       String
+  emoji      String
+  /// Key into OCCASION_THEMES (@love/shared).
+  theme      String
+  /// "solar" | "lunar": day/month on that calendar, recurring yearly.
+  /// "birthday" | "anniversary": the date comes from her Profile.
+  kind       String
+  day        Int?
+  month      Int?
+  daysBefore Int      @default(0)
+  daysAfter  Int      @default(0)
+  /// Banner text; "{name}" is replaced with her nickname.
+  message    String
+  isEnabled  Boolean  @default(true)
+  createdAt  DateTime @default(now())
 }

@@ -1,6 +1,7 @@
 # Render Blueprint: one free Docker web service serving both the API and the web app.
 # Database: Supabase (session pooler URL). No email: wishes show up on the admin's "Thông báo" page.
-# On first boot the API creates the admin (from ADMIN_*), her profile and the starter vouchers,
+# On first boot the API creates the admin (ADMIN_*), her profile, settings, the starter vouchers
+# and occasions (her login is created by the admin in /admin),
 # exactly once per database. Step-by-step guide: README.md → "Deploy lên Render".
 services:
   - type: web

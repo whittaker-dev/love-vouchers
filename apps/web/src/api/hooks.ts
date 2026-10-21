@@ -1,14 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
+  ActiveOccasionDto,
   AdminDto,
   ChangePasswordInput,
+  GreetingDto,
   LoginInput,
+  OccasionDto,
+  OccasionInput,
   ProfileDto,
   ProfileInput,
+  SettingsDto,
+  SettingsInput,
+  UserAccountDto,
+  UserCreateInput,
+  ViewerDto,
   VoucherDto,
   VoucherInput,
   WishDto,
   WishInput,
+  WishQuotaDto,
 } from "@love/shared";
 import { ApiError, json, request } from "./client";
 
@@ -16,15 +26,82 @@ import { ApiError, json, request } from "./client";
 // invalidation after a mutation always hits every screen showing the same data.
 export const queryKeys = {
   me: ["me"] as const,
+  viewer: ["viewer"] as const,
   profile: ["profile"] as const,
+  quota: ["quota"] as const,
+  greeting: ["greeting"] as const,
+  activeOccasion: (previewId: string | null) => ["occasion", "active", previewId] as const,
   vouchers: ["vouchers"] as const,
   wishes: ["wishes"] as const,
   adminVouchers: ["admin", "vouchers"] as const,
   adminVoucher: (id: string) => ["admin", "vouchers", id] as const,
   adminWishes: ["admin", "wishes"] as const,
+  adminOccasions: ["admin", "occasions"] as const,
+  settings: ["admin", "settings"] as const,
+  adminUser: ["admin", "user"] as const,
 };
 
-// ── Public (girlfriend) ────────────────────────────────────────────────
+/** Runs a request, mapping 401 to null so "logged out" is a value rather than an error. */
+async function orNullWhenLoggedOut<T>(run: () => Promise<T>): Promise<T | null> {
+  try {
+    return await run();
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return null;
+    throw error;
+  }
+}
+
+// ── Her pages ──────────────────────────────────────────────────────────
+
+/** Who is viewing her pages (she, or the admin previewing), or null when nobody is logged in. */
+export function useViewer() {
+  return useQuery({
+    queryKey: queryKeys.viewer,
+    queryFn: () => orNullWhenLoggedOut(() => request<ViewerDto>("/auth/viewer")),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useUserLogin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: LoginInput) => request<ViewerDto>("/auth/user/login", { method: "POST", body: json(input) }),
+    onSuccess: (viewer) => queryClient.setQueryData(queryKeys.viewer, viewer),
+  });
+}
+
+export function useUserLogout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => request<void>("/auth/user/logout", { method: "POST" }),
+    // Her data must not linger for whoever uses the browser next.
+    onSuccess: () => queryClient.resetQueries(),
+  });
+}
+
+export function useQuota() {
+  return useQuery({ queryKey: queryKeys.quota, queryFn: () => request<WishQuotaDto>("/wishes/quota") });
+}
+
+export function useGreeting() {
+  return useQuery({
+    queryKey: queryKeys.greeting,
+    queryFn: () => request<GreetingDto>("/greetings/today"),
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+/** Today's themed occasion; `previewId` (admin only) shows a chosen occasion instead. */
+export function useActiveOccasion(previewId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.activeOccasion(previewId),
+    queryFn: () =>
+      request<ActiveOccasionDto | null>(
+        previewId ? `/occasions/active?preview=${encodeURIComponent(previewId)}` : "/occasions/active",
+      ),
+    staleTime: 60 * 60 * 1000,
+  });
+}
 
 export function useProfile() {
   return useQuery({ queryKey: queryKeys.profile, queryFn: () => request<ProfileDto>("/profile") });
@@ -43,8 +120,9 @@ export function useSendWish() {
   return useMutation({
     mutationFn: (input: WishInput) => request<WishDto>("/wishes", { method: "POST", body: json(input) }),
     onSuccess: () => {
-      // Remaining counts changed, and the history list has a new entry.
+      // Remaining counts and this month's allowance changed, and the history list has a new entry.
       void queryClient.invalidateQueries({ queryKey: queryKeys.vouchers });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.quota });
       void queryClient.invalidateQueries({ queryKey: queryKeys.wishes });
       void queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
@@ -57,14 +135,7 @@ export function useSendWish() {
 export function useMe() {
   return useQuery({
     queryKey: queryKeys.me,
-    queryFn: async () => {
-      try {
-        return await request<AdminDto>("/auth/me");
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 401) return null;
-        throw error;
-      }
-    },
+    queryFn: () => orNullWhenLoggedOut(() => request<AdminDto>("/auth/me")),
     staleTime: 5 * 60 * 1000,
   });
 }
@@ -183,3 +254,73 @@ export const useCancelRedemption = () => useNotificationAction((id: string) => `
 
 /** "Xong hết" on a whole wish. */
 export const useCompleteWish = () => useNotificationAction((id: string) => `/admin/wishes/${id}/complete`);
+
+// ── Occasions ──────────────────────────────────────────────────────────
+
+export function useAdminOccasions() {
+  return useQuery({ queryKey: queryKeys.adminOccasions, queryFn: () => request<OccasionDto[]>("/admin/occasions") });
+}
+
+function useInvalidateOccasions() {
+  const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOccasions });
+    void queryClient.invalidateQueries({ queryKey: ["occasion"] });
+  };
+}
+
+export function useSaveOccasion() {
+  const invalidate = useInvalidateOccasions();
+  return useMutation({
+    mutationFn: ({ id, input }: { id?: string; input: OccasionInput }) =>
+      id
+        ? request<OccasionDto>(`/admin/occasions/${id}`, { method: "PUT", body: json(input) })
+        : request<OccasionDto>("/admin/occasions", { method: "POST", body: json(input) }),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteOccasion() {
+  const invalidate = useInvalidateOccasions();
+  return useMutation({
+    mutationFn: (id: string) => request<void>(`/admin/occasions/${id}`, { method: "DELETE" }),
+    onSuccess: invalidate,
+  });
+}
+
+// ── Settings & her login ───────────────────────────────────────────────
+
+export function useSettings() {
+  return useQuery({ queryKey: queryKeys.settings, queryFn: () => request<SettingsDto>("/admin/settings") });
+}
+
+export function useSaveSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SettingsInput) => request<SettingsDto>("/admin/settings", { method: "PUT", body: json(input) }),
+    onSuccess: (settings) => {
+      queryClient.setQueryData(queryKeys.settings, settings);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.quota });
+    },
+  });
+}
+
+export function useAdminUser() {
+  return useQuery({ queryKey: queryKeys.adminUser, queryFn: () => request<UserAccountDto | null>("/admin/user") });
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UserCreateInput) => request<UserAccountDto>("/admin/user", { method: "POST", body: json(input) }),
+    onSuccess: (user) => queryClient.setQueryData(queryKeys.adminUser, user),
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => request<void>("/admin/user", { method: "DELETE" }),
+    onSuccess: () => queryClient.setQueryData(queryKeys.adminUser, null),
+  });
+}

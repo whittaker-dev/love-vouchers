@@ -133,6 +133,12 @@ Nhãn nghiêng kiểu sticker ("MỘT LỜI NHẮN NHỎ ✦", ghi chú "của a
 | Field / Input / Textarea / FormError | `components/Field.tsx` | Lỗi trượt ra; ô sai thì rung nhẹ. |
 | EmojiPicker | `components/EmojiPicker.tsx` | Ô xem trước lớn + ô gõ emoji tự do + hàng emoji chọn nhanh. Dùng cho biểu tượng voucher và emoji đại diện của em (app không có upload ảnh). |
 | Switch, Avatar, StateViews | `components/*` | Avatar là emoji trên nền hồng phấn; skeleton màu hồng shimmer; EmptyState viền nét đứt. |
+| DatePicker | `components/DatePicker.tsx` | Thay mọi `<input type="date">`. Ô bấm mở lịch 3 cấp: **ngày → tháng → năm** (bấm tiêu đề để lên cấp), đổi tháng thì lưới trượt ngang theo hướng, ngày chọn có viên hồng `layoutId`. Desktop: popover dưới ô; **≤640px: bottom sheet** kéo lên từ đáy (portal ra `body`). Có `min` (vd. hạn voucher không trước hôm nay) và `startView` (ngày sinh mở thẳng ở cấp năm). |
+| DayMonthPicker | `components/DayMonthPicker.tsx` | Ngày lặp hằng năm (không có năm) cho dịp lễ: hàng chip tháng + lưới ngày; âm lịch tối đa 30 ngày, dương lịch theo tháng (cho 29/2). Rộng tối đa 420px. |
+| ScratchCard | `components/ScratchCard.tsx` | **Thẻ cào may mắn** mỗi ngày trên trang chủ: lớp foil hồng vẽ trên `<canvas>`, cào bằng ngón tay/chuột (`destination-out`), cào được 50% thì foil tan ra và lời chúc pop lên. Có nút "Mở luôn". Đã cào hôm nay thì nhớ trong `localStorage` (`lv-scratched:<ngày>`). |
+| OccasionLayer | `components/OccasionLayer.tsx` | Khi đang trong một dịp: banner dưới header (emoji + tên + lời nhắn, có nút đóng, nhớ trong `localStorage`) và lớp hạt emoji phủ màn hình (portal, `pointer-events: none`; 22 hạt, điện thoại 12). Kiểu hạt và chuyển động theo `lib/occasionThemes.ts`. |
+| UserLoginPage | `pages/UserLoginPage.tsx` | Trang đăng nhập của em ("Chào em 💕"), cùng tông với trang chủ. `RequireViewer` đưa người chưa đăng nhập về đây, giữ `?next=` (chỉ nhận đường dẫn trang em). |
+| Thanh lượt gửi | `WishForm.tsx` | Viên "Còn N/M lượt tháng X" trong form; hết lượt thì nút khoá và hiện lời nhắn ngày làm mới. |
 
 ## 6. Chuyển động
 
@@ -175,6 +181,12 @@ CSS dùng `--ease-out`, `--duration-fast` (150ms), `--duration-base` (250ms) cho
 | Xoá voucher (admin) | Hỏi lại tại chỗ (scale-in), dòng bay sang trái khi xoá, danh sách dồn lên |
 | Xử lý thông báo (admin) | **Xong**: dòng bay sang phải, nền xanh. **Huỷ**: hỏi lại tại chỗ, rồi dòng co lại. Thông báo xử lý hết thì cả thẻ thu nhỏ và biến mất; bộ đếm "N việc đang chờ" pop sang số mới |
 | Chọn emoji | Emoji mới xoay-pop vào ô xem trước, emoji cũ xoay ra |
+| Mở DatePicker | Popover trượt xuống + scale-in từ ô bấm (điện thoại: sheet trượt lên từ đáy); icon lịch xoay-pop. Đổi tháng/năm hoặc đổi cấp ngày ↔ tháng ↔ năm: lưới trượt ngang theo hướng, tiêu đề lật lên/xuống |
+| Chọn ngày / tháng | Viên hồng lướt tới ô mới (`layoutId`), ô bấm lún xuống; ô ngày của DayMonthPicker pop vào lần lượt khi đổi tháng |
+| Cào thẻ may mắn | Foil mất dần theo nét cào; qua 50% thì foil phóng to + blur rồi biến mất, emoji pop-xoay, lời chúc trượt lên |
+| Dịp lễ | Hạt emoji rơi (`fall`, có lắc), bay lên (`rise`), nhấp nháy (`twinkle`) hoặc bung như pháo hoa (`burst`), bằng CSS keyframes; banner trượt vào, emoji lắc lư, đóng thì banner biến mất |
+| Lượt gửi | Số lượt còn lại lật lên khi đổi; hết lượt thì viên đổi màu, nút gửi bị khoá và lời nhắn ngày làm mới hiện ra |
+| Đăng nhập em | Thẻ đăng nhập trượt lên + scale-in, icon xoay-pop, emoji trang trí bay lên nền |
 
 ### Lưu ý kỹ thuật
 
@@ -191,6 +203,8 @@ CSS dùng `--ease-out`, `--duration-fast` (150ms), `--duration-base` (250ms) cho
 - ≤640px: topbar chỉ còn logo (56px); điều hướng chuyển xuống **thanh tab dưới đáy** (💝 Voucher / 🌸 Về em / 💌 Đã gửi) có tôn trọng `safe-area-inset-bottom`; `SelectionBar` nổi phía trên thanh tab. Trang chừa 104px phía dưới (thanh tab ~74px + khoảng thở) để chữ cuối trang không dính vào thanh tab.
 - Hero: hình minh hoạ thu nhỏ 220px và lên **trên** tiêu đề; nút CTA full width.
 - Vùng chạm tối thiểu ~40px; tắt `-webkit-tap-highlight-color` vì đã có animation bấm riêng.
+- Admin ≤640px: thanh tab dưới đáy có 5 tab (Voucher / Thông báo / Dịp lễ / Hồ sơ / Tài khoản), cuộn ngang được; tab đang mở tự cuộn vào giữa, mép phải có mask mờ để báo còn tab.
+- DatePicker thành bottom sheet; mọi ô nhập vẫn 16px.
 - Kiểm tra ở chiều rộng 390px (iPhone) trước khi coi một màn hình là xong.
 
 ## 8. Giọng văn

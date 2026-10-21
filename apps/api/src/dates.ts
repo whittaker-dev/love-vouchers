@@ -14,3 +14,25 @@ export function todayInVietnam(): Date {
   const nowInVietnam = new Date(Date.now() + 7 * 60 * 60 * 1000);
   return fromDateOnly(nowInVietnam.toISOString().slice(0, 10))!;
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Today in Vietnam as "YYYY-MM-DD". */
+export function todayDateOnlyInVietnam(): string {
+  return toDateOnly(todayInVietnam())!;
+}
+
+/** Whole days from date-only `from` to date-only `to` (negative when `to` is earlier). */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((fromDateOnly(to)!.getTime() - fromDateOnly(from)!.getTime()) / DAY_MS);
+}
+
+export function addDays(dateOnly: string, days: number): string {
+  return toDateOnly(new Date(fromDateOnly(dateOnly)!.getTime() + days * DAY_MS))!;
+}
+
+/** Solar date for day/month in `year`, clamping 29/2 (and 31 in short months) to the month's last day. */
+export function solarDate(day: number, month: number, year: number): string {
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(Math.min(day, lastDay)).padStart(2, "0")}`;
+}

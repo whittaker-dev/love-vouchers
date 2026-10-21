@@ -6,6 +6,7 @@ import type { ProfileDto, ProfileInput } from "@love/shared";
 import { useProfile, useUpdateProfile } from "../../api/hooks";
 import { Button } from "../../components/Button";
 import { Field, FormError, Input, Textarea } from "../../components/Field";
+import { DatePicker } from "../../components/DatePicker";
 import { EmojiPicker } from "../../components/EmojiPicker";
 import { ErrorState, LoadingText } from "../../components/StateViews";
 import { apiFieldErrors, apiFormError, validate } from "../../lib/forms";
@@ -124,21 +125,23 @@ function ProfileForm({ initial }: { initial: ProfileDto }) {
         <div className={shared.formRow}>
           <Field label="Sinh nhật" error={errors.birthday}>
             {(id) => (
-              <Input
+              <DatePicker
                 id={id}
-                type="date"
-                value={form.birthday ?? ""}
-                onChange={(event) => set("birthday", event.target.value || null)}
+                value={form.birthday}
+                onChange={(date) => set("birthday", date)}
+                placeholder="Chọn sinh nhật em"
+                startView="years"
               />
             )}
           </Field>
           <Field label="Ngày yêu nhau" hint="Dùng để đếm số ngày bên nhau" error={errors.anniversary}>
             {(id) => (
-              <Input
+              <DatePicker
                 id={id}
-                type="date"
-                value={form.anniversary ?? ""}
-                onChange={(event) => set("anniversary", event.target.value || null)}
+                value={form.anniversary}
+                onChange={(date) => set("anniversary", date)}
+                placeholder="Chọn ngày yêu nhau"
+                startView="years"
               />
             )}
           </Field>

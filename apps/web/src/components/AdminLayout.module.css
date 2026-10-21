@@ -165,8 +165,17 @@
     display: inline;
   }
 
+  /* Five tabs do not fit 390px: let the row scroll and fade its right edge as a hint. */
   .tabs {
-    justify-content: space-between;
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+  }
+
+  /* Trailing spacer (padding is ignored at the end of a scrolling flex row) so the last tab can
+     scroll fully out of the faded edge. */
+  .tabs::after {
+    content: "";
+    flex: 0 0 48px;
   }
 
   .tab {

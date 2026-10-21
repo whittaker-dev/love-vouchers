@@ -81,3 +81,60 @@ export const wishInputSchema = z.object({
   message: optionalText(1000, "Lời nhắn"),
 });
 export type WishInput = z.input<typeof wishInputSchema>;
+
+/** Visual themes for occasions. Keys map to particle/banner styles in apps/web (OccasionTheme). */
+export const OCCASION_THEMES = [
+  "hearts",
+  "fireworks",
+  "blossoms",
+  "petals",
+  "stars",
+  "lanterns",
+  "spooky",
+  "snow",
+  "confetti",
+] as const;
+export type OccasionTheme = (typeof OCCASION_THEMES)[number];
+
+/** solar/lunar: recurring day+month on that calendar. birthday/anniversary: date from her profile. */
+export const OCCASION_KINDS = ["solar", "lunar", "birthday", "anniversary"] as const;
+export type OccasionKind = (typeof OCCASION_KINDS)[number];
+
+export const occasionInputSchema = z
+  .object({
+    name: z.string().trim().min(1, "Vui lòng nhập tên dịp").max(60, "Tên tối đa 60 ký tự"),
+    emoji,
+    theme: z.enum(OCCASION_THEMES, { error: "Chọn một hiệu ứng" }),
+    kind: z.enum(OCCASION_KINDS),
+    day: z.number().int().min(1, "Ngày không hợp lệ").max(31, "Ngày không hợp lệ").nullable(),
+    month: z.number().int().min(1, "Tháng không hợp lệ").max(12, "Tháng không hợp lệ").nullable(),
+    daysBefore: z.number().int().min(0).max(14, "Tối đa 14 ngày"),
+    daysAfter: z.number().int().min(0).max(14, "Tối đa 14 ngày"),
+    message: z.string().trim().min(1, "Vui lòng nhập lời chúc").max(160, "Lời chúc tối đa 160 ký tự"),
+    isEnabled: z.boolean(),
+  })
+  .refine((occasion) => !["solar", "lunar"].includes(occasion.kind) || (occasion.day && occasion.month), {
+    message: "Chọn ngày và tháng",
+    path: ["day"],
+  })
+  .refine((occasion) => occasion.kind !== "lunar" || (occasion.day ?? 0) <= 30, {
+    message: "Tháng âm lịch chỉ có tối đa 30 ngày",
+    path: ["day"],
+  });
+export type OccasionInput = z.input<typeof occasionInputSchema>;
+
+export const settingsInputSchema = z.object({
+  monthlyWishLimit: z
+    .number({ error: "Nhập một con số" })
+    .int("Nhập số nguyên")
+    .min(1, "Ít nhất 1 lần mỗi tháng")
+    .max(100, "Tối đa 100 lần"),
+});
+export type SettingsInput = z.input<typeof settingsInputSchema>;
+
+/** Her login, created by the admin. There is only one; to change it, delete it and create a new one. */
+export const userCreateSchema = z.object({
+  email: z.email("Email không hợp lệ").trim().toLowerCase(),
+  password: z.string().min(6, "Mật khẩu cần ít nhất 6 ký tự").max(128),
+});
+export type UserCreateInput = z.input<typeof userCreateSchema>;
